@@ -1,5 +1,5 @@
 -- ============================================
--- [ VVOV True Auto Pickup & Place - Lopez.lua ]
+-- [ VVOV Fully Working Auto Farm - Pvc.lua ]
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -32,7 +32,7 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -40, 0, 36)
-Title.Text = "  ⚡ VVOV Auto Farm (Lopez.lua)"
+Title.Text = "  ⚡ VVOV Auto Farm (Pvc.lua)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 Title.Font = Enum.Font.GothamBold
@@ -108,7 +108,6 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- محرك التجميع والرفع والتنزيل التلقائي الكامل 100%
 local function StartFullAutoFarm(mode)
     CurrentFarmMode = mode
 
@@ -121,7 +120,6 @@ local function StartFullAutoFarm(mode)
                 local tool = character:FindFirstChildOfClass("Tool")
 
                 if not tool then
-                    -- مرحلة أخذ الصندوق (Pick Up)
                     local pickupPrompt = nil
                     for _, prompt in ipairs(Workspace:GetDescendants()) do
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled and prompt.Parent and prompt.Parent:IsA("BasePart") then
@@ -140,7 +138,6 @@ local function StartFullAutoFarm(mode)
                         task.wait(0.3)
                     end
                 else
-                    -- مرحلة وضع الصندوق (Place)
                     local placePrompt = nil
                     for _, prompt in ipairs(Workspace:GetDescendants()) do
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled and prompt.Parent and prompt.Parent:IsA("BasePart") then
@@ -183,4 +180,3 @@ StopFarmBtn.MouseButton1Click:Connect(function()
     StatusLabel.Text = "الحالة: متوقف ⏸️"
     StatusLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 end)
-
