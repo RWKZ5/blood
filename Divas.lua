@@ -1,5 +1,5 @@
 -- ============================================
--- [ VVOV Instant Teleport Farm v3.0 ]
+-- [ VVOV Auto Farm - Normal Mode - yong.lua ]
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -15,17 +15,6 @@ end
 
 local CurrentFarmMode = "None"
 local IsMinimized = false
-
--- Instant Prompt Bypass (تصفير وقت انتظار الدائرة)
-task.spawn(function()
-    while task.wait(1) do
-        for _, prompt in ipairs(Workspace:GetDescendants()) do
-            if prompt:IsA("ProximityPrompt") then
-                prompt.HoldDuration = 0
-            end
-        end
-    end
-end)
 
 -- UI Setup
 local ScreenGui = Instance.new("ScreenGui")
@@ -43,7 +32,7 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -40, 0, 36)
-Title.Text = "  ⚡ VVOV Instant Farm v3.0"
+Title.Text = "  ⚡ VVOV Normal Farm"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 Title.Font = Enum.Font.GothamBold
@@ -79,7 +68,7 @@ Instance.new("UICorner", StatusLabel).CornerRadius = UDim.new(0, 6)
 local PizzaFarmBtn = Instance.new("TextButton", Container)
 PizzaFarmBtn.Size = UDim2.new(1, 0, 0, 38)
 PizzaFarmBtn.Position = UDim2.new(0, 0, 0, 48)
-PizzaFarmBtn.Text = "🍕 بيتزا سريعة (Teleport)"
+PizzaFarmBtn.Text = "🍕 توصيل البيتزا"
 PizzaFarmBtn.BackgroundColor3 = Color3.fromRGB(210, 105, 30)
 PizzaFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 PizzaFarmBtn.Font = Enum.Font.GothamBold
@@ -89,7 +78,7 @@ Instance.new("UICorner", PizzaFarmBtn).CornerRadius = UDim.new(0, 6)
 local BoxFarmBtn = Instance.new("TextButton", Container)
 BoxFarmBtn.Size = UDim2.new(1, 0, 0, 38)
 BoxFarmBtn.Position = UDim2.new(0, 0, 0, 92)
-BoxFarmBtn.Text = "📦 صناديق سريعة (Teleport)"
+BoxFarmBtn.Text = "📦 نقل الصناديق"
 BoxFarmBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 BoxFarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 BoxFarmBtn.Font = Enum.Font.GothamBold
@@ -106,7 +95,6 @@ StopFarmBtn.Font = Enum.Font.GothamBold
 StopFarmBtn.TextSize = 10
 Instance.new("UICorner", StopFarmBtn).CornerRadius = UDim.new(0, 6)
 
--- Minimize Logic
 MinimizeBtn.MouseButton1Click:Connect(function()
     IsMinimized = not IsMinimized
     if IsMinimized then
@@ -120,8 +108,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Fast Teleport Farming Engine
-local function StartInstantFarm(mode)
+local function StartNormalFarm(mode)
     CurrentFarmMode = mode
 
     task.spawn(function()
@@ -130,67 +117,35 @@ local function StartInstantFarm(mode)
             local hrp = character and character:FindFirstChild("HumanoidRootPart")
 
             if hrp then
-                local foundPrompt = false
-
-                for _, obj in ipairs(Workspace:GetDescendants()) do
+                for _, prompt in ipairs(Workspace:GetDescendants()) do
                     if CurrentFarmMode ~= mode then break end
 
-                    if obj:IsA("ProximityPrompt") and obj.Enabled then
-                        local objName = obj.Parent and obj.Parent.Name:lower() or ""
-                        local promptName = obj.ObjectText:lower() .. " " .. obj.ActionText:lower()
-
-                        local isMatch = false
-                        if mode == "Pizza" and (objName:find("pizza") or promptName:find("pizza") or promptName:find("بيتزا")) then
-                            isMatch = true
-                        elseif mode == "Box" and (objName:find("box") or objName:find("store") or promptName:find("box") or promptName:find("صندوق")) then
-                            isMatch = true
-                        end
-
-                        if isMatch and obj.Parent and obj.Parent:IsA("BasePart") then
-                            foundPrompt = true
-                            -- انتقال لحظي للأغراض والتفاعل المباشر
-                            hrp.CFrame = obj.Parent.CFrame + Vector3.new(0, 3, 0)
-                            task.wait(0.1)
-                            fireproximityprompt(obj)
-                            task.wait(0.2)
-                        end
-                    end
-                end
-
-                -- إذا كان يمسك غرض ينقله فوراً لنقطة التوصيل
-                local tool = character:FindFirstChildOfClass("Tool")
-                if tool then
-                    for _, dropZone in ipairs(Workspace:GetDescendants()) do
-                        if CurrentFarmMode ~= mode then break end
-
-                        local zoneName = dropZone.Name:lower()
-                        if zoneName:find("delivery") or zoneName:find("drop") or zoneName:find("sell") or zoneName:find("توصيل") then
-                            if dropZone:IsA("BasePart") then
-                                hrp.CFrame = dropZone.CFrame + Vector3.new(0, 3, 0)
-                                task.wait(0.3)
+                    if prompt:IsA("ProximityPrompt") and prompt.Enabled then
+                        local parent = prompt.Parent
+                        if parent and parent:IsA("BasePart") then
+                            local dist = (hrp.Position - parent.Position).Magnitude
+                            if dist <= 12 then
+                                fireproximityprompt(prompt)
+                                task.wait(0.5)
                             end
                         end
                     end
                 end
-
-                if not foundPrompt then
-                    task.wait(0.5)
-                end
             end
-            task.wait(0.1)
+            task.wait(0.5)
         end
     end)
 end
 
 PizzaFarmBtn.MouseButton1Click:Connect(function()
-    StartInstantFarm("Pizza")
-    StatusLabel.Text = "الحالة: تجميع بيتزا فوري ⚡🍕"
+    StartNormalFarm("Pizza")
+    StatusLabel.Text = "الحالة: تجميع بيتزا 🍕"
     StatusLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
 end)
 
 BoxFarmBtn.MouseButton1Click:Connect(function()
-    StartInstantFarm("Box")
-    StatusLabel.Text = "الحالة: نقل صناديق فوري ⚡📦"
+    StartNormalFarm("Box")
+    StatusLabel.Text = "الحالة: نقل صناديق 📦"
     StatusLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
 end)
 
@@ -199,3 +154,4 @@ StopFarmBtn.MouseButton1Click:Connect(function()
     StatusLabel.Text = "الحالة: متوقف ⏸️"
     StatusLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
 end)
+
