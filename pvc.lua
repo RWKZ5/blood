@@ -1,5 +1,5 @@
 -- ============================================
--- [ VVOV 100% Fully Auto Farm - Divas.lua ]
+-- [ VVOV True Auto Pickup & Place - Lopez.lua ]
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -32,7 +32,7 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -40, 0, 36)
-Title.Text = "  ⚡ VVOV Auto Farm (Fully Auto)"
+Title.Text = "  ⚡ VVOV Auto Farm (Lopez.lua)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 Title.Font = Enum.Font.GothamBold
@@ -108,7 +108,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- محرك التجميع التلقائي الكامل (Teleport Auto Loop)
+-- محرك التجميع والرفع والتنزيل التلقائي الكامل 100%
 local function StartFullAutoFarm(mode)
     CurrentFarmMode = mode
 
@@ -120,61 +120,48 @@ local function StartFullAutoFarm(mode)
             if hrp then
                 local tool = character:FindFirstChildOfClass("Tool")
 
-                -- الخطوة 1: إذا لم نكن نحمل أي غرض، ننقل الشخصية فوراً لمكان أخذ الصندوق/البيتزا
                 if not tool then
+                    -- مرحلة أخذ الصندوق (Pick Up)
+                    local pickupPrompt = nil
                     for _, prompt in ipairs(Workspace:GetDescendants()) do
-                        if CurrentFarmMode ~= mode then break end
-
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled and prompt.Parent and prompt.Parent:IsA("BasePart") then
                             local actText = prompt.ActionText:lower()
-                            local objText = prompt.ObjectText:lower()
-
-                            local isPickup = false
-                            if mode == "Box" and (actText:find("pick") or actText:find("grab") or objText:find("box") or actText:find("أخذ")) then
-                                isPickup = true
-                            elseif mode == "Pizza" and (actText:find("pizza") or objText:find("pizza") or actText:find("بيتزا")) then
-                                isPickup = true
-                            end
-
-                            if isPickup then
-                                -- نقل الشخصية فوق الصندوق مباشرة والتفاعل معه
-                                hrp.CFrame = prompt.Parent.CFrame + Vector3.new(0, 2, 0)
-                                task.wait(0.15)
-                                fireproximityprompt(prompt)
-                                task.wait(0.4)
+                            if actText:find("pick up") or actText:find("pick") or actText:find("grab") or actText:find("take") then
+                                pickupPrompt = prompt
                                 break
                             end
                         end
                     end
-                else
-                    -- الخطوة 2: إذا أصبح الغرض في اليد، ننقل الشخصية فوراً فوق مكان التنزيل (Place / Deliver)
-                    for _, prompt in ipairs(Workspace:GetDescendants()) do
-                        if CurrentFarmMode ~= mode then break end
 
+                    if pickupPrompt and pickupPrompt.Parent then
+                        hrp.CFrame = pickupPrompt.Parent.CFrame + Vector3.new(0, 2, 0)
+                        task.wait(0.15)
+                        fireproximityprompt(pickupPrompt)
+                        task.wait(0.3)
+                    end
+                else
+                    -- مرحلة وضع الصندوق (Place)
+                    local placePrompt = nil
+                    for _, prompt in ipairs(Workspace:GetDescendants()) do
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled and prompt.Parent and prompt.Parent:IsA("BasePart") then
                             local actText = prompt.ActionText:lower()
                             local parentName = prompt.Parent.Name:lower()
-
-                            local isDrop = false
-                            if mode == "Box" and (actText:find("place") or actText:find("drop") or parentName:find("place") or parentName:find("buy")) then
-                                isDrop = true
-                            elseif mode == "Pizza" and (actText:find("deliver") or actText:find("توصيل")) then
-                                isDrop = true
-                            end
-
-                            if isDrop then
-                                -- نقل الشخصية فوق منطقة التنزيل وتفريغ الحمولة تلقائياً
-                                hrp.CFrame = prompt.Parent.CFrame + Vector3.new(0, 2, 0)
-                                task.wait(0.15)
-                                fireproximityprompt(prompt)
-                                task.wait(0.4)
+                            if actText:find("place") or actText:find("drop") or parentName:find("place") then
+                                placePrompt = prompt
                                 break
                             end
                         end
                     end
+
+                    if placePrompt and placePrompt.Parent then
+                        hrp.CFrame = placePrompt.Parent.CFrame + Vector3.new(0, 2, 0)
+                        task.wait(0.15)
+                        fireproximityprompt(placePrompt)
+                        task.wait(0.3)
+                    end
                 end
             end
-            task.wait(0.2)
+            task.wait(0.1)
         end
     end)
 end
