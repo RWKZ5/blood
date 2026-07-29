@@ -1,5 +1,5 @@
 -- ============================================
--- [ VVOV Fully Working Auto Farm - Pvc.lua ]
+-- [ VVOV Fast Auto Farm - riv.lua ]
 -- ============================================
 
 local Players = game:GetService("Players")
@@ -32,7 +32,7 @@ Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, -40, 0, 36)
-Title.Text = "  ⚡ VVOV Auto Farm (Pvc.lua)"
+Title.Text = "  ⚡ VVOV Auto Farm (riv.lua)"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 Title.Font = Enum.Font.GothamBold
@@ -108,6 +108,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- محرك التنقل المستمر بين الأخذ والتنزيل
 local function StartFullAutoFarm(mode)
     CurrentFarmMode = mode
 
@@ -120,41 +121,40 @@ local function StartFullAutoFarm(mode)
                 local tool = character:FindFirstChildOfClass("Tool")
 
                 if not tool then
-                    local pickupPrompt = nil
+                    -- 1. أخذ الصندوق (Pick Up)
                     for _, prompt in ipairs(Workspace:GetDescendants()) do
+                        if CurrentFarmMode ~= mode then break end
+
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled and prompt.Parent and prompt.Parent:IsA("BasePart") then
                             local actText = prompt.ActionText:lower()
-                            if actText:find("pick up") or actText:find("pick") or actText:find("grab") or actText:find("take") then
-                                pickupPrompt = prompt
+                            local objText = prompt.ObjectText:lower()
+
+                            if actText:find("pick") or objText:find("box") or actText:find("take") then
+                                hrp.CFrame = prompt.Parent.CFrame + Vector3.new(0, 2.5, 0)
+                                task.wait(0.1)
+                                fireproximityprompt(prompt)
+                                task.wait(0.2)
                                 break
                             end
                         end
                     end
-
-                    if pickupPrompt and pickupPrompt.Parent then
-                        hrp.CFrame = pickupPrompt.Parent.CFrame + Vector3.new(0, 2, 0)
-                        task.wait(0.15)
-                        fireproximityprompt(pickupPrompt)
-                        task.wait(0.3)
-                    end
                 else
-                    local placePrompt = nil
+                    -- 2. تنزيل الصندوق (Place)
                     for _, prompt in ipairs(Workspace:GetDescendants()) do
+                        if CurrentFarmMode ~= mode then break end
+
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled and prompt.Parent and prompt.Parent:IsA("BasePart") then
                             local actText = prompt.ActionText:lower()
                             local parentName = prompt.Parent.Name:lower()
+
                             if actText:find("place") or actText:find("drop") or parentName:find("place") then
-                                placePrompt = prompt
+                                hrp.CFrame = prompt.Parent.CFrame + Vector3.new(0, 2.5, 0)
+                                task.wait(0.1)
+                                fireproximityprompt(prompt)
+                                task.wait(0.2)
                                 break
                             end
                         end
-                    end
-
-                    if placePrompt and placePrompt.Parent then
-                        hrp.CFrame = placePrompt.Parent.CFrame + Vector3.new(0, 2, 0)
-                        task.wait(0.15)
-                        fireproximityprompt(placePrompt)
-                        task.wait(0.3)
                     end
                 end
             end
